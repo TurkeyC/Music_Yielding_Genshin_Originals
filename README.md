@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1><span style="color: #00b0f0; ">M</span>usic <span style="color: #00b0f0; ">y</span>ielding <span style="color: #00b0f0; ">G</span>enshin <span style="color: #00b0f0; ">O</span>riginals <span style="color: #00b0f0; ">!!!!!</span> <br> ![MyGO](docs/MyGO.jpg)<br>🎵 HoyoMusic AI 音乐生成器</h1>
+<h1><img src="./docs/MyGO.jpg" alt="MyGO" style="zoom:100%;" /><br>🎵 HoyoMusic AI 音乐生成器</h1>
 
 > 基于原神音乐数据集的AI音乐生成器，使用PyTorch深度学习技术生成Hoyo-Mix 风格的游戏音乐
 
