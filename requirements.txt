@@ -1,0 +1,12 @@
+tensorflow
+numpy
+pandas
+music21
+matplotlib
+requests
+tqdm
+datasets
+huggingface_hub
+mido
+pretty_midi
+pyfluidsynth
