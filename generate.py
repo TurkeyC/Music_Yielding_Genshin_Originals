@@ -2,7 +2,8 @@ import os
 import numpy as np
 import pickle
 from model import HoyoMusicGenerator
-from abc_to_midi import ABCToMIDIConverter
+from tools.abc_to_midi import ABCToMIDIConverter
+from tools.abc_cleaner import fix_abc_structure
 import argparse
 
 def save_abc_to_file(abc_text, filename):
@@ -11,24 +12,9 @@ def save_abc_to_file(abc_text, filename):
         f.write(abc_text)
     print(f"📝 ABC音乐已保存到: {filename}")
 
-def clean_generated_abc(text):
-    """清理生成的ABC文本"""
-    lines = text.split('\n')
-    cleaned_lines = []
-    
-    for line in lines:
-        line = line.strip()
-        if len(line) > 0:
-            cleaned_lines.append(line)
-    
-    # 确保有适当的结构
-    result = '\n'.join(cleaned_lines)
-    
-    # 如果没有结束符，添加一个
-    if not result.endswith('|]') and not result.endswith(':|'):
-        result += ' |]'
-    
-    return result
+def clean_generated_abc(text, title="Generated Music"):
+    """清理生成的ABC文本，使用专业的ABC清理器"""
+    return fix_abc_structure(text, title)
 
 def main():
     parser = argparse.ArgumentParser(description='生成HoyoMusic风格的ABC记谱和MIDI')
@@ -69,9 +55,9 @@ def main():
     print("🤖 加载训练好的模型...")
     try:
         generator = HoyoMusicGenerator(vocab_size, seq_length)
-        generator.load_model('models/hoyomusic_generator.h5')
+        generator.load_model('models/hoyomusic_generator.pth')
     except FileNotFoundError:
-        print("❌ 错误: 未找到模型文件 models/hoyomusic_generator.h5")
+        print("❌ 错误: 未找到模型文件 models/hoyomusic_generator.pth")
         print("请先运行 python train.py --use-hoyomusic 训练模型")
         return
     
@@ -100,7 +86,8 @@ def main():
         )
     
     # 4. 清理和保存ABC文件
-    cleaned_text = clean_generated_abc(generated_text)
+    print("🔧 后处理ABC格式...")
+    cleaned_text = clean_generated_abc(generated_text, f"{args.region} Style Music")
     
     # 确保输出目录存在
     os.makedirs('generated_music', exist_ok=True)

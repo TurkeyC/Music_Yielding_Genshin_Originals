@@ -2,7 +2,7 @@ import os
 import numpy as np
 from data_processor import HoyoMusicDataProcessor
 from model import HoyoMusicGenerator
-from training_visualizer import TrainingVisualizer
+from tools.training_visualizer import TrainingVisualizer
 import matplotlib.pyplot as plt
 import argparse
 import json
@@ -10,6 +10,9 @@ import threading
 import time
 
 def plot_training_history(history, save_path='hoyomusic_training_history.png'):
+    # 设置中文字体支持
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+
     """绘制训练历史"""
     plt.figure(figsize=(15, 5))
     
@@ -33,16 +36,7 @@ def plot_training_history(history, save_path='hoyomusic_training_history.png'):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    plt.subplot(1, 3, 3)
-    if 'sparse_top_k_categorical_accuracy' in history.history:
-        plt.plot(history.history['sparse_top_k_categorical_accuracy'], 
-                label='Top-5准确率', color='purple', linewidth=2)
-        plt.title('Top-5准确率')
-        plt.xlabel('Epoch')
-        plt.ylabel('准确率')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-    
+    # 移除第三个子图，因为PyTorch版本不需要Top-K准确率
     plt.tight_layout()
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.show()
@@ -73,8 +67,7 @@ def main():
                        help='序列长度')
     parser.add_argument('--lstm-units', type=int, default=512,
                        help='LSTM单元数')
-    
-    # 训练相关参数
+      # 训练相关参数
     parser.add_argument('--epochs', type=int, default=100,
                        help='训练轮数')
     parser.add_argument('--batch-size', type=int, default=32,
@@ -83,7 +76,7 @@ def main():
     # 增量训练参数
     parser.add_argument('--incremental', action='store_true',
                        help='进行增量训练（基于现有模型）')
-    parser.add_argument('--base-model', type=str, default='models/hoyomusic_generator.h5',
+    parser.add_argument('--base-model', type=str, default='models/hoyomusic_generator.pth',
                        help='基础模型路径（用于增量训练）')
     parser.add_argument('--incremental-lr', type=float, default=0.0005,
                        help='增量训练的学习率')
@@ -161,8 +154,7 @@ def main():
         embedding_dim=256,
         lstm_units=args.lstm_units
     )
-    
-    # 如果是增量训练，加载现有模型
+      # 如果是增量训练，加载现有模型
     if args.incremental:
         if os.path.exists(args.base_model):
             success = generator.load_model_for_incremental_training(
@@ -184,7 +176,7 @@ def main():
         epochs=args.epochs,
         batch_size=args.batch_size,
         validation_split=0.2,
-        model_save_path='models/hoyomusic_generator.h5',
+        model_save_path='models/hoyomusic_generator.pth',
         is_incremental=args.incremental
     )
     
@@ -209,7 +201,6 @@ def main():
         'training_date': time.strftime('%Y-%m-%d %H:%M:%S'),
         'data_sources': data_sources
     }
-    
     if args.incremental:
         config['base_model'] = args.base_model
         config['incremental_lr'] = args.incremental_lr
@@ -228,7 +219,7 @@ def main():
     print("🎉 训练完成！")
     print("=" * 60)
     print("📁 文件保存位置:")
-    print("  - 模型: models/hoyomusic_generator.h5")
+    print("  - 模型: models/hoyomusic_generator.pth")
     print("  - 字符映射: models/hoyomusic_mappings.pkl")
     print("  - 训练历史: models/training_history.json")
     print("  - 训练配置: models/training_config.json")

@@ -29,14 +29,15 @@ class HoyoMusicLSTM(nn.Module):
         
         # 嵌入层
         self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=0)
-          # LSTM层 - 修复dropout警告
-        self.lstm1 = nn.LSTM(embedding_dim, lstm_units, batch_first=True, num_layers=2, dropout=0.3)
+        
+        # LSTM层
+        self.lstm1 = nn.LSTM(embedding_dim, lstm_units, batch_first=True, dropout=0.3)
         self.bn1 = nn.BatchNorm1d(lstm_units)
         
-        self.lstm2 = nn.LSTM(lstm_units, lstm_units, batch_first=True, num_layers=2, dropout=0.3)
+        self.lstm2 = nn.LSTM(lstm_units, lstm_units, batch_first=True, dropout=0.3)
         self.bn2 = nn.BatchNorm1d(lstm_units)
         
-        self.lstm3 = nn.LSTM(lstm_units, lstm_units, batch_first=True, num_layers=2, dropout=0.3)
+        self.lstm3 = nn.LSTM(lstm_units, lstm_units, batch_first=True, dropout=0.3)
         self.bn3 = nn.BatchNorm1d(lstm_units)
         
         # 全连接层
@@ -528,67 +529,3 @@ class HoyoMusicGenerator:
         seed = region_seeds.get(region, region_seeds["Mondstadt"])
         
         return self.generate_music(seed, char_to_int, int_to_char, length, temperature)
-    
-    def get_model_size(self):
-        """获取模型参数数量"""
-        if self.model is None:
-            return 0
-        
-        total_params = sum(p.numel() for p in self.model.parameters())
-        trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        
-        return trainable_params
-    
-    def train_step(self, X, y):
-        """执行单步训练并返回损失值"""
-        if self.model is None:
-            raise ValueError("模型未构建，请先调用build_model()")
-        
-        self.model.train()
-        
-        # 转换数据到tensor
-        X_tensor = torch.LongTensor(X).to(device)
-        y_tensor = torch.LongTensor(y).to(device)
-        
-        # 前向传播
-        outputs = self.model(X_tensor)
-        loss = self.criterion(outputs, y_tensor)
-        
-        # 反向传播
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-        
-        return loss.item()
-    
-    def generate_sequence(self, seed_sequence, length=100, temperature=1.0):
-        """生成音符序列（用于测试）"""
-        if self.model is None:
-            raise ValueError("模型未加载或未训练")
-        
-        self.model.eval()
-        
-        # 确保种子序列长度正确
-        if len(seed_sequence) < self.seq_length:
-            # 用0填充到所需长度
-            seed_sequence = [0] * (self.seq_length - len(seed_sequence)) + list(seed_sequence)
-        elif len(seed_sequence) > self.seq_length:
-            # 截取最后seq_length个元素
-            seed_sequence = seed_sequence[-self.seq_length:]
-        
-        generated_sequence = list(seed_sequence)
-        
-        # 生成新的音符
-        with torch.no_grad():
-            for _ in range(length):
-                # 预测下一个字符
-                current_seq = generated_sequence[-self.seq_length:]
-                x = torch.LongTensor([current_seq]).to(device)
-                outputs = self.model(x)
-                predictions = F.softmax(outputs / temperature, dim=1).cpu().numpy()[0]
-                
-                # 采样下一个字符
-                next_idx = np.random.choice(len(predictions), p=predictions)
-                generated_sequence.append(next_idx)
-        
-        return generated_sequence
