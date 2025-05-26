@@ -30,6 +30,33 @@ python train.py --use-hoyomusic --max-samples 1000
 
 # 自定义参数
 python train.py --use-hoyomusic --epochs 150 --batch-size 16 --seq-length 150
+
+# 标准训练
+python train.py --use-hoyomusic --real-time-monitor
+
+# 快速测试训练
+python train.py --use-hoyomusic --max-samples 1000 --epochs 20
+```
+
+### 增量训练
+```bash
+# 基于现有模型继续训练
+python train.py --incremental --epochs 50 --real-time-monitor
+
+# 使用更多数据进行增量训练
+python train.py --incremental --additional-data-dir "./new_abc_files" --epochs 30
+
+# 调整学习率的增量训练
+python train.py --incremental --incremental-lr 0.0001 --epochs 25
+```
+
+### 实时监控训练过程
+```bash
+# 启动实时训练监控
+python training_visualizer.py
+
+# 在训练时启用监控
+python train.py --use-hoyomusic --real-time-monitor
 ```
 
 ### 生成音乐
