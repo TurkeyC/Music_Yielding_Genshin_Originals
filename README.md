@@ -1,4 +1,6 @@
-# <font color="#00b0f0">M</font>usic <font color="#00b0f0">y</font>ielding <font color="#00b0f0">G</font>enshin <font color="#00b0f0">O</font>riginals <font color="#00b0f0">!!!!!</font> <br>🎵 HoyoMusic AI 音乐生成器
+<div align="center">
+
+<h1><font color="#00b0f0">M</font>usic <font color="#00b0f0">y</font>ielding <font color="#00b0f0">G</font>enshin <font color="#00b0f0">O</font>riginals <font color="#00b0f0">!!!!!</font> <br>🎵 HoyoMusic AI 音乐生成器</h1>
 
 > 基于原神音乐数据集的AI音乐生成器，使用PyTorch深度学习技术生成Hoyo-Mix 风格的游戏音乐
 
@@ -6,6 +8,8 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.6.0-red.svg)](https://pytorch.org)
 [![CUDA](https://img.shields.io/badge/CUDA-12.4-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+</div>
 
 ## ✨ 特性亮点
 
