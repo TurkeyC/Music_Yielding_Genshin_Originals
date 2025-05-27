@@ -1,3 +1,11 @@
 /.venv
 /__pycache__
 /项目创建历程.md
+# 重构后的忽略规则
+backup_old_files/
+cache/
+output/generated/*.abc
+output/logs/*.log
+temp/
+src/ui/themes/*.css.backup
+.streamlit/

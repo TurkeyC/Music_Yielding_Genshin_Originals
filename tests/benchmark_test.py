@@ -15,6 +15,8 @@ import numpy as np
 from model import HoyoMusicGenerator
 from data_processor import HoyoMusicDataProcessor
 import matplotlib.pyplot as plt
+# 设置中文字体支持
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 
 def benchmark_model_sizes():
     """测试不同模型大小的性能"""
@@ -120,21 +122,41 @@ def benchmark_device_performance():
         X = np.random.randint(0, 100, (batch_size, 100))
         y = np.random.randint(0, 100, (batch_size,))
         
+        # --- 修复关键：将X和y转为当前device上的tensor ---
+        X_tensor = torch.LongTensor(X).to(device)
+        y_tensor = torch.LongTensor(y).to(device)
+        
         # 预热
         for _ in range(5):
-            generator.train_step(X, y)
+            generator.model.train()
+            outputs = generator.model(X_tensor)
+            loss = generator.criterion(outputs, y_tensor)
+            generator.optimizer.zero_grad()
+            loss.backward()
+            generator.optimizer.step()
         
         # 训练性能测试
         start_time = time.time()
         for _ in range(20):
-            loss = generator.train_step(X, y)
+            generator.model.train()
+            outputs = generator.model(X_tensor)
+            loss = generator.criterion(outputs, y_tensor)
+            generator.optimizer.zero_grad()
+            loss.backward()
+            generator.optimizer.step()
         train_time = (time.time() - start_time) / 20
         
         # 生成性能测试
         seed = np.random.randint(0, 100, 100)
         start_time = time.time()
         for _ in range(10):
-            generated = generator.generate_sequence(seed, length=100)
+            # 生成时模型已在device上，seed输入转为device
+            current_seq = list(seed[-generator.seq_length:])
+            x = torch.LongTensor([current_seq]).to(device)
+            with torch.no_grad():
+                outputs = generator.model(x)
+                predictions = torch.softmax(outputs / 1.0, dim=1).cpu().numpy()[0]
+                _ = np.random.choice(len(predictions), p=predictions)
         gen_time = (time.time() - start_time) / 10
         
         results[device_name] = {
@@ -253,11 +275,11 @@ def save_benchmark_report(model_results, device_results, quality_results):
         ax4.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('pytorch_benchmark_report.png', dpi=300, bbox_inches='tight')
+    plt.savefig(r'tests/report/pytorch_benchmark_report.png', dpi=300, bbox_inches='tight')
     plt.show()
     
     # 保存文本报告
-    with open('pytorch_benchmark_report.txt', 'w', encoding='utf-8') as f:
+    with open(r'tests/report/pytorch_benchmark_report.txt', 'w', encoding='utf-8') as f:
         f.write("HoyoMusic PyTorch性能基准测试报告\n")
         f.write("=" * 50 + "\n\n")
         
