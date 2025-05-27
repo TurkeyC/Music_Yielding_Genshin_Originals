@@ -25,7 +25,7 @@ class ABCToMIDIConverter:
             # 保留音乐内容行
             elif line and not line.startswith('%'):
                 # 清理音乐行，移除无效字符
-                music_line = re.sub(r'[^\w\s|:\[\](){}.,/\\-+#^=_~><]', '', line)
+                music_line = re.sub(r'[^\w\s|:\[\](){}.,/\\ -+#^=_~><]', '', line)
                 if music_line.strip():
                     current_tune.append(music_line)
             
